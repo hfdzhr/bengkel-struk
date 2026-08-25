@@ -217,6 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context: ctx,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setD) => AlertDialog(
+          scrollable: true,
           title: Text(existing == null ? 'Tulis Manual' : 'Ubah Layanan',
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
           content: Column(
@@ -364,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisCount: 2,
                       mainAxisSpacing: 12,
                       crossAxisSpacing: 12,
-                      mainAxisExtent: 96,
+                      mainAxisExtent: 108,
                     ),
                     itemBuilder: (_, i) => _serviceButton(_catalog[i]),
                   ),
@@ -475,11 +476,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      fontSize: 21, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 2),
+                      fontSize: 21, height: 1.15, fontWeight: FontWeight.w700)),
+              const SizedBox(height: 4),
               Text(PrinterService.uang(item.price),
                   style: TextStyle(
-                      fontSize: 18, color: Colors.blueGrey.shade700)),
+                      fontSize: 18,
+                      height: 1.15,
+                      color: Colors.blueGrey.shade700)),
             ],
           ),
         ),
@@ -673,6 +676,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
               int.tryParse(ctl.text.replaceAll(RegExp('[^0-9]'), '')) ?? 0;
           final selisih = bayar - _total;
           return AlertDialog(
+            scrollable: true,
             title: const Text('Kembalian',
                 style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900)),
             content: Column(

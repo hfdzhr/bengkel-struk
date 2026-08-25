@@ -41,7 +41,7 @@ class _PrinterScreenState extends State<PrinterScreen> {
 
   Future<void> _pick(BluetoothInfo d) async {
     _toast('Menyambungkan ke ${d.name}...');
-    final ok = await PrinterService.connect(d.macAdress);
+    final ok = await PrinterService.reconnect(d.macAdress);
     if (!mounted) return;
     ScaffoldMessenger.of(context).clearSnackBars();
     if (ok) {

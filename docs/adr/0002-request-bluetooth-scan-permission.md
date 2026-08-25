@@ -1,0 +1,9 @@
+# Request BLUETOOTH_SCAN at runtime, not just BLUETOOTH_CONNECT
+
+Confirmed via `adb logcat` on the owner's Samsung A56 (Android 16): every `connect()` attempt to the Xantri BT-58D threw `SecurityException: Need android.permission.BLUETOOTH_SCAN permission ... BluetoothAdapterServiceBinder.cancelDiscovery()`. This is the actual root cause of "gagal mencetak" reported on-device — not the stale-connection issue from [ADR-0001](./0001-printer-disconnect-before-reconnect.md), which is still a valid fix but wasn't the blocker here.
+
+The `print_bluetooth_thermal` native connect routine calls `bluetoothAdapter.cancelDiscovery()` before opening the RFCOMM socket, and Android 12+ requires the caller to hold `BLUETOOTH_SCAN` for that call — even though this app never scans for devices itself (`pairedBluetooths` only reads already-bonded devices). `AndroidManifest.xml` already declared `BLUETOOTH_SCAN`, but `PrinterService.ensurePermission()` only ever requested `BLUETOOTH_CONNECT` at runtime, so `BLUETOOTH_SCAN` stayed ungranted and every connect silently failed inside the plugin's own catch block (logged natively, never surfaced to Flutter).
+
+**Decision:** `ensurePermission()` requests both `BLUETOOTH_CONNECT` and `BLUETOOTH_SCAN` together, and `PrinterService.connect()` calls `ensurePermission()` itself before attempting a connection (not only when listing paired devices from the Settings screen) — so any code path that connects is guaranteed to have prompted for both permissions first. The manifest's `BLUETOOTH_SCAN` entry got `android:usesPermissionFlags="neverForLocation"` since we never derive location from scan results, avoiding an implicit location-permission requirement.
+
+**Consequence:** existing installs need to grant the new "Nearby devices" (BLUETOOTH_SCAN) permission once — the app will prompt automatically on the next connect attempt after this update.

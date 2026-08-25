@@ -8,10 +8,29 @@ class PrinterService {
   /// Kertas 58mm = 32 karakter per baris pada font standar.
   static const int cols = 32;
 
+  // Channel plugin ini tidak punya timeout bawaan: kalau native side gagal
+  // memanggil balik result (mis. permission Bluetooth belum diizinkan di
+  // Android 12+), Future-nya menggantung selamanya. _guard membatasi itu
+  // supaya UI selalu berakhir dengan gagal, bukan macet diam-diam.
+  static Future<bool> _guard(Future<bool> Function() call,
+      {Duration timeout = const Duration(seconds: 10)}) async {
+    try {
+      return await call().timeout(timeout, onTimeout: () => false);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// BLUETOOTH_CONNECT dan BLUETOOTH_SCAN dua-duanya wajib diminta: plugin
+  /// native memanggil `cancelDiscovery()` sebelum connect, dan itu tetap
+  /// butuh izin BLUETOOTH_SCAN di Android 12+ walau kita sendiri tidak
+  /// pernah scan (lihat docs/adr/0002).
   static Future<bool> ensurePermission() async {
-    var status = await Permission.bluetoothConnect.status;
-    if (!status.isGranted) status = await Permission.bluetoothConnect.request();
-    if (status.isGranted) return true;
+    final statuses = await [
+      Permission.bluetoothConnect,
+      Permission.bluetoothScan,
+    ].request();
+    if (statuses.values.every((s) => s.isGranted)) return true;
     // Android 11 ke bawah: Bluetooth butuh izin lokasi.
     final legacy = await Permission.locationWhenInUse.request();
     return legacy.isGranted;
@@ -28,26 +47,31 @@ class PrinterService {
   }
 
   static Future<bool> connect(String mac) async {
-    try {
-      return await PrintBluetoothThermal.connect(macPrinterAddress: mac);
-    } catch (_) {
-      return false;
-    }
+    if (!await ensurePermission()) return false;
+    return _guard(() => PrintBluetoothThermal.connect(macPrinterAddress: mac));
   }
 
-  static Future<bool> get isConnected async {
-    try {
-      return await PrintBluetoothThermal.connectionStatus;
-    } catch (_) {
-      return false;
-    }
+  /// Plugin native TIDAK bisa connect ulang selama koneksi lama masih
+  /// dianggap ada di sisinya walau socket-nya sudah mati (lihat dokumentasi
+  /// printer di docs/adr) — jadi disconnect dulu sebelum connect supaya
+  /// percobaan ulang benar-benar membuka koneksi baru.
+  static Future<bool> reconnect(String mac) async {
+    await disconnect();
+    return connect(mac);
   }
+
+  static Future<bool> disconnect() => _guard(
+      () => PrintBluetoothThermal.disconnect, timeout: const Duration(seconds: 5));
+
+  static Future<bool> get isConnected =>
+      _guard(() => PrintBluetoothThermal.connectionStatus,
+          timeout: const Duration(seconds: 5));
 
   /// Sambungkan ulang printer tersimpan saat aplikasi dibuka.
   static Future<void> autoConnect() async {
     final mac = Store.printerAddress;
     if (mac == null || await isConnected) return;
-    await connect(mac);
+    await reconnect(mac);
   }
 
   static Future<bool> printReceipt({
@@ -55,20 +79,17 @@ class PrinterService {
     required String customer,
     required String plate,
     required String motor,
-  }) async {
-    try {
-      final bytes =
-          _buildBytes(lines, customer, plate, motor);
-      return await PrintBluetoothThermal.writeBytes(bytes);
-    } catch (_) {
-      return false;
-    }
+  }) {
+    final bytes = _buildBytes(lines, customer, plate, motor);
+    return _guard(() => PrintBluetoothThermal.writeBytes(bytes));
   }
 
-  /// Cetak dengan percobaan ulang otomatis (Bluetooth printer thermal sering
-  /// putus-nyambung). Menyambung ulang ke [Store.printerAddress] sebelum tiap
-  /// percobaan ke-2 dan seterusnya. [onAttempt] dipanggil sebelum tiap
-  /// percobaan (attempt mulai dari 1) supaya UI bisa menampilkan status.
+  /// Cetak dengan percobaan ulang otomatis. Setiap percobaan — termasuk yang
+  /// pertama — disconnect+connect ulang dulu ke [Store.printerAddress]
+  /// sebelum mencetak; koneksi Bluetooth classic ke printer thermal gampang
+  /// mati diam-diam saat idle, jadi tidak boleh mengandalkan koneksi lama
+  /// dari auto-connect saat app dibuka. [onAttempt] dipanggil sebelum tiap
+  /// percobaan (mulai dari 1) supaya UI bisa menampilkan status.
   static Future<bool> printReceiptWithRetry({
     required List<CartLine> lines,
     required String customer,
@@ -79,8 +100,8 @@ class PrinterService {
   }) async {
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
       onAttempt?.call(attempt, maxAttempts);
-      if (attempt > 1 && Store.printerAddress != null) {
-        await connect(Store.printerAddress!);
+      if (Store.printerAddress != null) {
+        await reconnect(Store.printerAddress!);
       }
       final ok = await printReceipt(
           lines: lines, customer: customer, plate: plate, motor: motor);
