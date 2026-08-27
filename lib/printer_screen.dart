@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 
+import 'app_theme.dart';
 import 'printer_service.dart';
 import 'store.dart';
 
@@ -116,12 +117,12 @@ class _PrinterScreenState extends State<PrinterScreen> {
           const SizedBox(height: 8),
           if (Store.printerName != null)
             Card(
-              color: Colors.green[50],
+              color: AppColors.green.withValues(alpha: 0.10),
               child: ListTile(
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 leading: const Icon(Icons.bluetooth_connected,
-                    size: 36, color: Colors.green),
+                    size: 36, color: AppColors.green),
                 title: Text(Store.printerName!,
                     style: const TextStyle(
                         fontSize: 20, fontWeight: FontWeight.w800)),
@@ -131,9 +132,9 @@ class _PrinterScreenState extends State<PrinterScreen> {
             )
           else
             Card(
-              color: Colors.yellow[100],
+              color: AppColors.amber.withValues(alpha: 0.18),
               child: const ListTile(
-                leading: Icon(Icons.info_outline, size: 36),
+                leading: Icon(Icons.info_outline, size: 36, color: AppColors.navy),
                 title: Text('Belum ada printer pilihan — pilih di bawah',
                     style: TextStyle(fontSize: 18)),
               ),
@@ -175,7 +176,7 @@ class _PrinterScreenState extends State<PrinterScreen> {
                       style: const TextStyle(fontSize: 15)),
                   trailing: d.macAdress == Store.printerAddress
                       ? const Icon(Icons.check_circle,
-                          color: Colors.green, size: 34)
+                          color: AppColors.green, size: 34)
                       : null,
                 ),
               ),

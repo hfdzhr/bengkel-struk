@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'app_theme.dart';
 import 'input_formatters.dart';
 import 'printer_screen.dart';
 import 'printer_service.dart';
@@ -291,12 +292,43 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // ---------- UI ----------
 
+  /// Garis status di bawah judul: teks tegas, bukan cuma warna ikon,
+  /// supaya jelas terbaca tanpa perlu menafsirkan warna.
+  Widget _printerBanner() {
+    final ok = _printerOk;
+    final color = ok ? AppColors.green : AppColors.alertRed;
+    return Material(
+      color: color.withValues(alpha: 0.10),
+      child: InkWell(
+        onTap: _openPrinter,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Icon(ok ? Icons.check_circle : Icons.error_outline,
+                  color: color, size: 22),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  ok
+                      ? 'Printer siap dipakai'
+                      : 'Printer belum tersambung — ketuk untuk atur',
+                  style: TextStyle(
+                      fontSize: 17, fontWeight: FontWeight.w800, color: color),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Struk Bengkel',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900)),
+        title: const Text('Struk Bengkel'),
         actions: [
           IconButton(
             tooltip: 'Status printer',
@@ -305,7 +337,6 @@ class _HomeScreenState extends State<HomeScreen> {
               _printerOk
                   ? Icons.bluetooth_connected
                   : Icons.bluetooth_disabled,
-              color: _printerOk ? Colors.green : Colors.red,
               size: 30,
             ),
           ),
@@ -313,6 +344,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
+          _printerBanner(),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -401,88 +433,117 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: Material(
-        elevation: 12,
-        color: Colors.white,
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('TOTAL',
-                          style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black45,
-                              letterSpacing: 1)),
-                      Text(
-                        PrinterService.uang(_total),
-                        style: const TextStyle(
-                            fontSize: 38, fontWeight: FontWeight.w900),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          CustomPaint(
+            painter: const ReceiptEdgePainter(Colors.white),
+            child: const SizedBox(height: 9),
+          ),
+          Material(
+            elevation: 12,
+            color: Colors.white,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('TOTAL',
+                              style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.black45,
+                                  letterSpacing: 1)),
+                          Text(
+                            PrinterService.uang(_total),
+                            style: const TextStyle(
+                                fontSize: 38, fontWeight: FontWeight.w900),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    FilledButton.icon(
+                      onPressed: _print,
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(180, 78),
+                        backgroundColor: AppColors.green,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
+                      ),
+                      icon: const Icon(Icons.print, size: 34),
+                      label: const Text('CETAK',
+                          style: TextStyle(
+                              fontSize: 26, fontWeight: FontWeight.w900)),
+                    ),
+                  ],
                 ),
-                FilledButton.icon(
-                  onPressed: _print,
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(180, 78),
-                    backgroundColor: const Color(0xFF2E7D32),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
-                  ),
-                  icon: const Icon(Icons.print, size: 34),
-                  label: const Text('CETAK',
-                      style: TextStyle(
-                          fontSize: 26, fontWeight: FontWeight.w900)),
-                ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   Widget _serviceButton(CatalogItem item) {
+    final visual = serviceVisual(item.name);
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         onTap: () => _addToCart(item.name, item.price),
         onLongPress: () => _editCatalogItem(item),
         child: Container(
           width: double.infinity,
           height: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.blueGrey.shade100, width: 1.5),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Row(
             children: [
-              Text(item.name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                      fontSize: 21, height: 1.15, fontWeight: FontWeight.w700)),
-              const SizedBox(height: 4),
-              Text(PrinterService.uang(item.price),
-                  style: TextStyle(
-                      fontSize: 18,
-                      height: 1.15,
-                      color: Colors.blueGrey.shade700)),
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: visual.color.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(visual.icon, color: visual.color, size: 24),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(item.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                            fontSize: 19,
+                            height: 1.15,
+                            fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 4),
+                    Text(PrinterService.uang(item.price),
+                        style: TextStyle(
+                            fontSize: 17,
+                            height: 1.15,
+                            color: Colors.blueGrey.shade700)),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -567,7 +628,7 @@ class _SuccessScreenState extends State<SuccessScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1B5E20),
+      backgroundColor: AppColors.greenDark,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -591,12 +652,12 @@ class _SuccessScreenState extends State<SuccessScreen> {
                       color: Colors.white)),
               const Spacer(),
               _bigBtn('HITUNG KEMBALIAN', Colors.white,
-                  const Color(0xFF1B5E20), _showKembalianDialog),
+                  AppColors.greenDark, _showKembalianDialog),
               const SizedBox(height: 14),
               _bigBtn(_busy ? _busyLabel : 'CETAK ULANG',
                   Colors.white24, Colors.white, _busy ? null : _reprint),
               const SizedBox(height: 14),
-              _bigBtn('STRUK BARU', const Color(0xFFF9A825), Colors.black,
+              _bigBtn('STRUK BARU', AppColors.amber, Colors.black,
                   () {
                 widget.onNewStruk();
                 Navigator.of(context)
@@ -709,8 +770,8 @@ class _SuccessScreenState extends State<SuccessScreen> {
                         height: 1.25,
                         fontWeight: FontWeight.w900,
                         color: selisih >= 0
-                            ? const Color(0xFF2E7D32)
-                            : Colors.red),
+                            ? AppColors.green
+                            : AppColors.alertRed),
                   ),
               ],
             ),

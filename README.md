@@ -2,7 +2,7 @@
 
 Aplikasi kasir sederhana untuk bengkel motor pribadi. Dibuat untuk kebutuhan sendiri: catat layanan, cetak struk ke printer thermal Bluetooth, selesai — tanpa ribet.
 
-Ini adalah project pribadi (personal project) dan juga jadi sarana belajar Flutter, jadi nama package di `pubspec.yaml` masih `belajar_flutter` walau aplikasinya sudah dipakai sehari-hari.
+Ini adalah project pribadi (personal project) untuk kebutuhan bengkel sehari-hari.
 
 ## Latar belakang
 
