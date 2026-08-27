@@ -328,7 +328,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Struk Bengkel'),
+        title: const Text('OtoNota'),
         actions: [
           IconButton(
             tooltip: 'Status printer',

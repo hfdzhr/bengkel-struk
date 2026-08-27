@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_theme.dart';
-import 'home_screen.dart';
+import 'splash_screen.dart';
 import 'store.dart';
 
 Future<void> main() async {
@@ -16,9 +16,9 @@ class StrukApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Struk Bengkel',
+      title: 'OtoNota',
       theme: buildAppTheme(),
-      home: const HomeScreen(),
+      home: const SplashScreen(),
     );
   }
 }

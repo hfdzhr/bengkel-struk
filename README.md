@@ -1,4 +1,4 @@
-# Struk Bengkel
+# OtoNota
 
 Aplikasi kasir sederhana untuk bengkel motor pribadi. Dibuat untuk kebutuhan sendiri: catat layanan, cetak struk ke printer thermal Bluetooth, selesai — tanpa ribet.
 
@@ -6,7 +6,7 @@ Ini adalah project pribadi (personal project) untuk kebutuhan bengkel sehari-har
 
 ## Latar belakang
 
-Bengkel motor kecil biasanya cuma butuh: tulis layanan apa saja, hitung total, cetak struk buat pelanggan. Aplikasi POS di pasaran kebanyakan kebanyakan fitur (stok, laporan, multi-cabang, dll) untuk kebutuhan sekecil ini. Struk Bengkel sengaja dibuat minim langkah:
+Bengkel motor kecil biasanya cuma butuh: tulis layanan apa saja, hitung total, cetak struk buat pelanggan. Aplikasi POS di pasaran kebanyakan kebanyakan fitur (stok, laporan, multi-cabang, dll) untuk kebutuhan sekecil ini. OtoNota sengaja dibuat minim langkah:
 
 - Buka app → langsung di layar "Buat Struk", nol langkah tambahan.
 - Font besar & tombol besar supaya nyaman dipakai orang yang tidak terbiasa HP (termasuk lansia).
