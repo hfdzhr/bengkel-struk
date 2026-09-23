@@ -2,6 +2,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:print_bluetooth_thermal/post_code.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 
+import '../models/cart_line.dart';
 import 'store.dart';
 
 class PrinterService {
@@ -61,7 +62,8 @@ class PrinterService {
   }
 
   static Future<bool> disconnect() => _guard(
-      () => PrintBluetoothThermal.disconnect, timeout: const Duration(seconds: 5));
+      () => PrintBluetoothThermal.disconnect,
+      timeout: const Duration(seconds: 5));
 
   static Future<bool> get isConnected =>
       _guard(() => PrintBluetoothThermal.connectionStatus,

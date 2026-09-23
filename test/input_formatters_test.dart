@@ -1,7 +1,6 @@
+import 'package:bengkel_struk/core/utils/input_formatters.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:bengkel_struk/input_formatters.dart';
 
 String _apply(TextInputFormatter f, String input) => f
     .formatEditUpdate(TextEditingValue.empty, TextEditingValue(text: input))

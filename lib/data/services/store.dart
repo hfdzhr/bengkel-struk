@@ -1,38 +1,41 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class CatalogItem {
-  final String name;
-  final int price;
-  const CatalogItem({required this.name, required this.price});
+import '../models/catalog_item.dart';
 
-  factory CatalogItem.fromJson(Map<String, dynamic> j) =>
-      CatalogItem(name: j['name'] as String, price: j['price'] as int);
-  Map<String, dynamic> toJson() => {'name': name, 'price': price};
-}
-
-/// Satu baris pada struk (dipakai di keranjang & saat mencetak).
-class CartLine {
-  final String name;
-  final int price;
-  int qty;
-  CartLine({required this.name, required this.price, this.qty = 1});
-
-  int get subtotal => price * qty;
-}
-
-/// Penyimpanan lokal sederhana: katalog layanan, nama bengkel, printer pilihan.
+/// Penyimpanan lokal & sync Firestore: katalog layanan, nama bengkel, printer pilihan.
 class Store {
   static late SharedPreferences _p;
+  static final _settingsDoc =
+      FirebaseFirestore.instance.collection('settings').doc('shop_profile');
 
   static Future<void> init() async {
     _p = await SharedPreferences.getInstance();
     if (!_p.containsKey('catalog')) catalog = defaultCatalog;
+
+    // Sinkronisasi awal dari Firestore ke lokal (jika ada data online)
+    try {
+      final doc = await _settingsDoc.get();
+      if (doc.exists) {
+        final data = doc.data();
+        if (data != null && data['shopName'] != null) {
+          final remoteName = data['shopName'] as String;
+          if (remoteName.isNotEmpty) {
+            _p.setString('shopName', remoteName);
+          }
+        }
+      }
+    } catch (_) {}
   }
 
   static String get shopName => _p.getString('shopName') ?? 'Bengkel';
-  static set shopName(String v) => _p.setString('shopName', v);
+  static set shopName(String v) {
+    _p.setString('shopName', v);
+    // Simpan juga ke Firestore (offline cache otomatis aktif)
+    _settingsDoc.set({'shopName': v}, SetOptions(merge: true)).catchError((_) {});
+  }
 
   static List<CatalogItem> get catalog {
     final raw = _p.getString('catalog');

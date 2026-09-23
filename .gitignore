@@ -44,5 +44,10 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Signing config (secret — do not commit)
+/android/key.properties
+/android/app/upload-keystore.jks
+
 # Agent scratch files
 .scratch/
+.claude/

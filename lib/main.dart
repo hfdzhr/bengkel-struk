@@ -1,11 +1,16 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-import 'app_theme.dart';
-import 'splash_screen.dart';
-import 'store.dart';
+import 'core/theme/app_theme.dart';
+import 'data/services/store.dart';
+import 'firebase_options.dart';
+import 'ui/splash/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   await Store.init();
   runApp(const StrukApp());
 }

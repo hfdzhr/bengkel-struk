@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "260714610722",
+    "project_id": "bengkel-struk",
+    "storage_bucket": "bengkel-struk.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:260714610722:android:d1021ac9bb3f660cd74a7b",
+        "android_client_info": {
+          "package_name": "id.otonota.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDE3u--J1hw2tv0CO8dbKdFfIoZR3Vodzs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

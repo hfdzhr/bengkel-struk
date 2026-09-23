@@ -1,6 +1,5 @@
+import 'package:bengkel_struk/data/services/printer_service.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:bengkel_struk/printer_service.dart';
 
 void main() {
   test('uang: format rupiah', () {
